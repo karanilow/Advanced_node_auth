@@ -9,8 +9,6 @@ const errorHandler = (err, req, res, next) => {
 
   error.message = err.message;
 
-  console.log(err);
-
   // 11000 in Mongoose is duplicated key
   // 400 is a bad request
   if (err.code === 11000) {
