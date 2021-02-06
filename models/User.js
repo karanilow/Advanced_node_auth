@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -49,6 +50,15 @@ UserSchema.pre("save", async function (next) {
 // function key word important
 UserSchema.methods.matchPasswords = async function (password) {
   return await bcrypt.compare(password, this.password);
+};
+
+// The sign method gets a payload, a secret and an object that wrap the options
+// The User model can use process.env variables because we use this model in auth.js
+// which below in the initiation of the package
+UserSchema.methods.getSignedToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
 };
 
 const User = mongoose.model("User", UserSchema);

@@ -19,6 +19,7 @@ app.use(express.json());
 
 // Redirect any request to the auth router
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/private", require("./routes/private"));
 
 // Error Handler (Should be last piece of middleware)
 // This because the errors are called with the next() function.
