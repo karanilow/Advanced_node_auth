@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -33,6 +34,8 @@ const UserSchema = new mongoose.Schema({
 // Next is argument necessary if the pwd hasn't been change
 // Need PAckage Bcrypt
 UserSchema.pre("save", async function (next) {
+  // This condition is useful for the feature of forgot passwords
+  // We save the user new passwordToken and passwordExpire
   if (!this.isModified("password")) {
     next();
   }
@@ -59,6 +62,21 @@ UserSchema.methods.getSignedToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
+};
+
+UserSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash the reset password
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Expires in 10 min
+  this.resetPasswordExpire = Date.now + 10 * (60 * 1000);
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", UserSchema);
